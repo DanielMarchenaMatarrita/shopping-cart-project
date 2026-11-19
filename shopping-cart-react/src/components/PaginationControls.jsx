@@ -3,8 +3,11 @@ import { usePagination } from "../hooks/usePagination";
 export default function PaginationControls() {
     const { currentPage, totalPages, nextPage, prevPage } = usePagination();
 
-    // Nothing to paginate (initial load or no matching products).
-    if (totalPages < 1) return null;
+    // Nothing to paginate (initial load, empty results, or an invalid page
+    // that is being corrected in the URL).
+    if (totalPages === null || totalPages < 1 || currentPage > totalPages) {
+        return null;
+    }
 
     const isFirstPage = currentPage <= 1;
     const isLastPage = currentPage >= totalPages;

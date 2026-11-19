@@ -1,3 +1,9 @@
+import { categories } from "./categories";
+
+export function getCategoryLabel(categoryId) {
+  return categories.find((category) => category.id === categoryId)?.label ?? "Other";
+}
+
 export function filterCatalog(items, { query = "", categoryId = "all" } = {}) {
   const normalized = query.trim().toLocaleLowerCase("es-CR");
   return items.filter((item) => {

@@ -1,4 +1,5 @@
 import "./ItemCard.css";
+import { Link, useLocation } from "react-router";
 import { categories } from "../data/categories";
 import { isPurchasable } from "../data/catalogSelectors";
 
@@ -16,6 +17,12 @@ export default function ItemCard({ item, mode = "reference", onViewDetails, onAd
   const forSale = mode === "store" && isPurchasable(item);
   const imageSrc = item.media?.imageUrl ?? item.image ?? null;
   const imageAlt = item.media?.alt ?? `Imagen de ${item.name}`;
+  const location = useLocation();
+  const detailsPath = `/products/${encodeURIComponent(item.id)}`;
+  const detailsState = {
+    from: `${location.pathname}${location.search}`,
+  };
+
   return (
     <article className="item-card">
       <div className="item-card__media">
@@ -35,11 +42,36 @@ export default function ItemCard({ item, mode = "reference", onViewDetails, onAd
           <span className="item-card__category">{labels[item.categoryId] ?? "Other"}</span>
           <span className="item-card__badge">{forSale ? "In store" : "Reference only"}</span>
         </div>
-        <h2 className="item-card__title">{item.name}</h2>
+        <h2 className="item-card__title">
+          <Link
+            className="item-card__title-link"
+            to={detailsPath}
+            state={detailsState}
+          >
+            {item.name}
+          </Link>
+        </h2>
         <p className="item-card__subtitle">{item.unit ? `Sale unit: ${item.unit}` : "Sale unit pending confirmation"}</p>
         {forSale && <p className="item-card__price">{crc.format(item.price)}</p>}
         <div className="item-card__actions">
-          <button type="button" className="item-card__details" onClick={() => onViewDetails(item)}>View details</button>
+          <Link
+            className="item-card__details"
+            to={detailsPath}
+            state={detailsState}
+            aria-label={`View details for ${item.name}`}
+          >
+            View details
+          </Link>
+          {typeof onViewDetails === "function" && (
+            <button
+              type="button"
+              className="item-card__quick-view"
+              onClick={() => onViewDetails(item)}
+              aria-label={`Quick view ${item.name}`}
+            >
+              Quick view
+            </button>
+          )}
           {forSale && typeof onAddToCart === "function" && (
             <button type="button" className="item-card__buy" onClick={() => onAddToCart(item)}>Add to cart</button>
           )}

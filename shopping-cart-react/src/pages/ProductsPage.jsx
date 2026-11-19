@@ -1,4 +1,5 @@
 import { useLayoutEffect, useState } from "react";
+import { useSearchParams } from "react-router";
 import ItemDetails from "../components/ItemDetails";
 import ItemGrid from "../components/ItemGrid";
 import PaginationControls from "../components/PaginationControls";
@@ -8,12 +9,23 @@ import { useProducts } from "../hooks/useProducts";
 
 const PAGE_SIZE = 12;
 
+function parseCategory(searchParams) {
+    const categoryId = searchParams.get("category") ?? "all";
+    const isKnownCategory = categories.some(
+        (category) => category.id === categoryId
+    );
+
+    return isKnownCategory ? categoryId : "all";
+}
+
 export default function ProductsPage() {
-    const [search, setSearch] = useState("");
-    const [categoryId, setCategoryId] = useState("all");
+    const [searchParams, setSearchParams] = useSearchParams();
     const [selectedItem, setSelectedItem] = useState(null);
 
-    const { currentPage, setTotalPages, resetPage } = usePagination();
+    const search = searchParams.get("search") ?? "";
+    const categoryId = parseCategory(searchParams);
+
+    const { currentPage, setTotalPages } = usePagination();
 
     const { products, pagination, loading, error } = useProducts({
         search,
@@ -30,14 +42,44 @@ export default function ProductsPage() {
         setTotalPages(pagination.totalPages);
     }, [pagination, setTotalPages]);
 
+    function updateFilters({ search: nextSearch, categoryId: nextCategory }) {
+        setSearchParams(
+            (previousParams) => {
+                const params = new URLSearchParams(previousParams);
+                const searchValue =
+                    nextSearch ?? previousParams.get("search") ?? "";
+                const categoryValue =
+                    nextCategory ?? previousParams.get("category") ?? "all";
+
+                if (searchValue) {
+                    params.set("search", searchValue);
+                } else {
+                    params.delete("search");
+                }
+
+                if (categoryValue && categoryValue !== "all") {
+                    params.set("category", categoryValue);
+                } else {
+                    params.delete("category");
+                }
+
+                // Filters always restart the catalog on page 1. Doing this in
+                // the same URL update keeps one source of truth and avoids an
+                // intermediate fetch for the old page.
+                params.delete("page");
+
+                return params;
+            },
+            { replace: true }
+        );
+    }
+
     function handleSearchChange(event) {
-        setSearch(event.target.value);
-        resetPage();
+        updateFilters({ search: event.target.value });
     }
 
     function handleCategoryChange(event) {
-        setCategoryId(event.target.value);
-        resetPage();
+        updateFilters({ categoryId: event.target.value });
     }
 
     const showResults = !loading && !error;

@@ -1,6 +1,5 @@
-
 import { useEffect, useRef } from "react";
-import { categories } from "../data/categories";
+import ProductInformation from "./ProductInformation";
 
 export default function ItemDetails({ item, onClose }) {
   const dialogRef = useRef(null);
@@ -21,10 +20,6 @@ export default function ItemDetails({ item, onClose }) {
     };
   }, []);
 
-  const category =
-    categories.find((entry) => entry.id === item.categoryId)
-      ?.label ?? "Other";
-
   return (
     <dialog
       ref={dialogRef}
@@ -44,46 +39,7 @@ export default function ItemDetails({ item, onClose }) {
         </button>
       </div>
 
-      <dl>
-        <dt>Category</dt>
-        <dd>{category}</dd>
-
-        <dt>Catalog status</dt>
-        <dd>Reference data — not store inventory</dd>
-
-        <dt>Sale unit</dt>
-        <dd>{item.unit ?? "Pending confirmation"}</dd>
-
-        <dt>Retail price</dt>
-        <dd>Not available</dd>
-
-        <dt>Source status</dt>
-        <dd>{item.sourceStatus ?? "Not verified"}</dd>
-
-        {item.sourceNote && (
-          <>
-            <dt>Source note</dt>
-            <dd>{item.sourceNote}</dd>
-          </>
-        )}
-      </dl>
-
-      {item.sourceUrl && (
-        <p>
-          <a
-            href={item.sourceUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            View original reference source
-          </a>
-        </p>
-      )}
-
-      <p className="item-dialog__notice">
-        CENADA reference information does not establish
-        current stock, pricing, or retail availability.
-      </p>
+      <ProductInformation item={item} />
     </dialog>
   );
 }
