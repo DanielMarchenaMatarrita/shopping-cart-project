@@ -1,6 +1,7 @@
 import { Link, useLocation, useParams } from "react-router";
 import ProductInformation from "../components/ProductInformation";
-import { getCategoryLabel } from "../data/catalogSelectors";
+import { getCategoryLabel, isPurchasable } from "../data/catalogSelectors";
+import { useCart } from "../features/cart/useCart";
 import { useProductDetails } from "../hooks/useProductDetails";
 
 function resolveBackTo(location) {
@@ -17,7 +18,11 @@ export default function ProductDetailPage() {
     const { id } = useParams();
     const location = useLocation();
     const { product, loading, error } = useProductDetails(id);
+    const { addItem } = useCart();
     const backTo = resolveBackTo(location);
+    const canPurchase = product
+        ? product.isDemo === true && isPurchasable(product)
+        : false;
 
     return (
         <main className="catalog-page product-detail">
@@ -55,12 +60,28 @@ export default function ProductDetailPage() {
                     <header>
                         <p className="eyebrow">
                             {getCategoryLabel(product.categoryId)}
+                            {product.isDemo ? " · Demo store" : ""}
                         </p>
                         <h1>{product.name}</h1>
                         <p className="product-detail__id">
-                            Reference ID: {product.id}
+                            {product.isDemo ? "Demo product ID" : "Reference ID"}
+                            : {product.id}
                         </p>
                     </header>
+
+                    {canPurchase && (
+                        <div className="product-detail__actions">
+                            <button
+                                type="button"
+                                className="product-detail__add"
+                                onClick={() => addItem(product)}
+                                aria-label={`Add ${product.name} to cart`}
+                            >
+                                Add to cart
+                            </button>
+                            <Link to="/cart">View cart</Link>
+                        </div>
+                    )}
 
                     <ProductInformation item={product} />
                 </article>

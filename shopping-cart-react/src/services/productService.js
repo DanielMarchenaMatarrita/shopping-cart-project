@@ -1,4 +1,5 @@
 import { referenceCatalog } from "../data/referenceCatalog";
+import { storeCatalog } from "../data/storeCatalog";
 import { filterCatalog } from "../data/catalogSelectors";
 
 const DEFAULT_PAGE_SIZE = 12;
@@ -41,9 +42,11 @@ export async function getProducts({
 }
 
 export async function getProductById(id) {
+    const matchesId = (product) => String(product.id) === String(id);
+
     return (
-        referenceCatalog.find(
-            (product) => String(product.id) === String(id)
-        ) ?? null
+        referenceCatalog.find(matchesId) ??
+        storeCatalog.find(matchesId) ??
+        null
     );
 }

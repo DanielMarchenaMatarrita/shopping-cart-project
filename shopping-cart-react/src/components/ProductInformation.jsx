@@ -1,26 +1,46 @@
 import { getCategoryLabel } from "../data/catalogSelectors";
+import { formatCrc } from "../utils/formatCurrency";
 
 export default function ProductInformation({ item }) {
+    const isDemo = item.isDemo === true;
+    const sourceStatus = isDemo
+        ? "Fictional demo data"
+        : item.sourceStatus ?? "Not verified";
+
     return (
         <>
+            {isDemo && (
+                <p className="product-info__demo">
+                    Demo store product — fictional price and availability
+                </p>
+            )}
+
             <dl className="product-info">
                 <dt>Category</dt>
                 <dd>{getCategoryLabel(item.categoryId)}</dd>
 
-                <dt>Reference ID</dt>
+                <dt>{isDemo ? "Demo product ID" : "Reference ID"}</dt>
                 <dd>{item.id}</dd>
 
                 <dt>Catalog status</dt>
-                <dd>Reference data — not store inventory</dd>
+                <dd>
+                    {isDemo
+                        ? "Fictional demo store item — not real inventory"
+                        : "Reference data — not store inventory"}
+                </dd>
 
                 <dt>Sale unit</dt>
                 <dd>{item.unit ?? "Pending confirmation"}</dd>
 
-                <dt>Retail price</dt>
-                <dd>Not available</dd>
+                <dt>{isDemo ? "Demo price" : "Retail price"}</dt>
+                <dd>
+                    {isDemo && Number.isInteger(item.price)
+                        ? `${formatCrc(item.price)} per ${item.unit ?? "unit"}`
+                        : "Not available"}
+                </dd>
 
                 <dt>Source status</dt>
-                <dd>{item.sourceStatus ?? "Not verified"}</dd>
+                <dd>{sourceStatus}</dd>
 
                 {item.sourceNote && (
                     <>
@@ -31,8 +51,12 @@ export default function ProductInformation({ item }) {
 
                 {item.currency && (
                     <>
-                        <dt>Reference currency</dt>
-                        <dd>{item.currency}</dd>
+                        <dt>Currency</dt>
+                        <dd>
+                            {isDemo
+                                ? `${item.currency} (integer colones)`
+                                : item.currency}
+                        </dd>
                     </>
                 )}
             </dl>
@@ -50,8 +74,9 @@ export default function ProductInformation({ item }) {
             )}
 
             <p className="product-info__notice">
-                CENADA reference information does not establish current stock,
-                pricing, or retail availability.
+                {isDemo
+                    ? "Fictional demo information for shopping-cart testing. Not a real Tropical Fruits & Veggies offer, price, or inventory record."
+                    : "CENADA reference information does not establish current stock, pricing, or retail availability."}
             </p>
         </>
     );

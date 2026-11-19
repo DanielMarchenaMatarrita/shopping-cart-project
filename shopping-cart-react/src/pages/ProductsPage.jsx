@@ -1,9 +1,11 @@
-import { useLayoutEffect, useState } from "react";
-import { useSearchParams } from "react-router";
+import { useEffect, useLayoutEffect, useState } from "react";
+import { useLocation, useSearchParams } from "react-router";
 import ItemDetails from "../components/ItemDetails";
 import ItemGrid from "../components/ItemGrid";
 import PaginationControls from "../components/PaginationControls";
 import { categories } from "../data/categories";
+import { storeCatalog } from "../data/storeCatalog";
+import { useCart } from "../features/cart/useCart";
 import { usePagination } from "../hooks/usePagination";
 import { useProducts } from "../hooks/useProducts";
 
@@ -21,11 +23,22 @@ function parseCategory(searchParams) {
 export default function ProductsPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [selectedItem, setSelectedItem] = useState(null);
+    const location = useLocation();
+    const { addItem } = useCart();
 
     const search = searchParams.get("search") ?? "";
     const categoryId = parseCategory(searchParams);
 
     const { currentPage, setTotalPages } = usePagination();
+
+    // Links such as the empty-cart call to action use /products#demo-store.
+    useEffect(() => {
+        if (location.hash !== "#demo-store") return;
+
+        document
+            .getElementById("demo-store")
+            ?.scrollIntoView({ block: "start" });
+    }, [location.hash]);
 
     const { products, pagination, loading, error } = useProducts({
         search,
@@ -102,69 +115,109 @@ export default function ProductsPage() {
                 </p>
             </header>
 
-            <form
-                className="catalog-filters"
-                role="search"
-                onSubmit={(event) => event.preventDefault()}
+            <section
+                id="demo-store"
+                className="demo-store"
+                aria-labelledby="demo-store-title"
             >
-                <div className="filter-field">
-                    <label htmlFor="catalog-search">Search products</label>
-                    <input
-                        id="catalog-search"
-                        type="search"
-                        value={search}
-                        onChange={handleSearchChange}
-                        placeholder="Search by product name…"
-                        autoComplete="off"
-                    />
+                <div className="demo-store__heading">
+                    <div>
+                        <p className="eyebrow">Shopping cart demo</p>
+                        <h2 id="demo-store-title">Demo store</h2>
+                    </div>
+                    <span className="demo-store__tag">Fictional data</span>
                 </div>
+                <p className="demo-store__notice">
+                    These five products and their CRC prices are invented for
+                    testing the shopping cart. They are not real Tropical Fruits
+                    &amp; Veggies inventory, offers, or availability.
+                </p>
 
-                <div className="filter-field">
-                    <label htmlFor="catalog-category">Category</label>
-                    <select
-                        id="catalog-category"
-                        value={categoryId}
-                        onChange={handleCategoryChange}
-                    >
-                        <option value="all">All categories</option>
-                        {categories.map((category) => (
-                            <option key={category.id} value={category.id}>
-                                {category.label}
-                            </option>
-                        ))}
-                    </select>
+                <ItemGrid
+                    items={storeCatalog}
+                    mode="store"
+                    label="Fictional demo store products"
+                    onViewDetails={setSelectedItem}
+                    onAddToCart={addItem}
+                />
+            </section>
+
+            <section aria-labelledby="reference-catalog-title">
+                <div className="catalog-section-heading">
+                    <p className="eyebrow">Research data</p>
+                    <h2 id="reference-catalog-title">Reference catalog</h2>
                 </div>
-            </form>
-
-            {loading && (
-                <p className="catalog-status" role="status">
-                    Loading products…
+                <p className="catalog-section-note">
+                    Reference-only entries cannot be added to the cart.
                 </p>
-            )}
 
-            {error && (
-                <p className="catalog-status catalog-status--error" role="alert">
-                    Unable to load the catalog. Please try again.
-                </p>
-            )}
+                <form
+                    className="catalog-filters"
+                    role="search"
+                    onSubmit={(event) => event.preventDefault()}
+                >
+                    <div className="filter-field">
+                        <label htmlFor="catalog-search">Search products</label>
+                        <input
+                            id="catalog-search"
+                            type="search"
+                            value={search}
+                            onChange={handleSearchChange}
+                            placeholder="Search by product name…"
+                            autoComplete="off"
+                        />
+                    </div>
 
-            {showResults && (
-                <>
-                    <p className="catalog-count" aria-live="polite">
-                        {pagination && pagination.total > 0
-                            ? `Showing ${firstVisible}–${lastVisible} of ${pagination.total} products`
-                            : "No matching products"}
+                    <div className="filter-field">
+                        <label htmlFor="catalog-category">Category</label>
+                        <select
+                            id="catalog-category"
+                            value={categoryId}
+                            onChange={handleCategoryChange}
+                        >
+                            <option value="all">All categories</option>
+                            {categories.map((category) => (
+                                <option key={category.id} value={category.id}>
+                                    {category.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </form>
+
+                {loading && (
+                    <p className="catalog-status" role="status">
+                        Loading products…
                     </p>
+                )}
 
-                    <ItemGrid
-                        items={products}
-                        mode="reference"
-                        onViewDetails={setSelectedItem}
-                    />
+                {error && (
+                    <p
+                        className="catalog-status catalog-status--error"
+                        role="alert"
+                    >
+                        Unable to load the catalog. Please try again.
+                    </p>
+                )}
 
-                    <PaginationControls />
-                </>
-            )}
+                {showResults && (
+                    <>
+                        <p className="catalog-count" aria-live="polite">
+                            {pagination && pagination.total > 0
+                                ? `Showing ${firstVisible}–${lastVisible} of ${pagination.total} products`
+                                : "No matching products"}
+                        </p>
+
+                        <ItemGrid
+                            items={products}
+                            mode="reference"
+                            onViewDetails={setSelectedItem}
+                        />
+
+                        <PaginationControls />
+                    </>
+                )}
+            </section>
 
             {selectedItem && (
                 <ItemDetails

@@ -2,6 +2,7 @@ import "./ItemCard.css";
 import { Link, useLocation } from "react-router";
 import { categories } from "../data/categories";
 import { isPurchasable } from "../data/catalogSelectors";
+import { formatCrc } from "../utils/formatCurrency";
 
 const labels = Object.fromEntries(categories.map(({ id, label }) => [id, label]));
 const categoryIcons = {
@@ -11,10 +12,9 @@ const categoryIcons = {
   "raices-tuberculos": "🥕", "bulbos-condimentos": "🧄",
   cruciferas: "🥦", "granos-leguminosas": "🌽",
 };
-const crc = new Intl.NumberFormat("es-CR", { style: "currency", currency: "CRC" });
 
 export default function ItemCard({ item, mode = "reference", onViewDetails, onAddToCart }) {
-  const forSale = mode === "store" && isPurchasable(item);
+  const forSale = mode === "store" && item.isDemo === true && isPurchasable(item);
   const imageSrc = item.media?.imageUrl ?? item.image ?? null;
   const imageAlt = item.media?.alt ?? `Imagen de ${item.name}`;
   const location = useLocation();
@@ -40,7 +40,9 @@ export default function ItemCard({ item, mode = "reference", onViewDetails, onAd
       <div className="item-card__body">
         <div className="item-card__meta">
           <span className="item-card__category">{labels[item.categoryId] ?? "Other"}</span>
-          <span className="item-card__badge">{forSale ? "In store" : "Reference only"}</span>
+          <span className={`item-card__badge${forSale ? " item-card__badge--demo" : ""}`}>
+            {forSale ? "Demo store" : "Reference only"}
+          </span>
         </div>
         <h2 className="item-card__title">
           <Link
@@ -52,7 +54,11 @@ export default function ItemCard({ item, mode = "reference", onViewDetails, onAd
           </Link>
         </h2>
         <p className="item-card__subtitle">{item.unit ? `Sale unit: ${item.unit}` : "Sale unit pending confirmation"}</p>
-        {forSale && <p className="item-card__price">{crc.format(item.price)}</p>}
+        {forSale && (
+          <p className="item-card__price">
+            {formatCrc(item.price)} <small>fictional price</small>
+          </p>
+        )}
         <div className="item-card__actions">
           <Link
             className="item-card__details"

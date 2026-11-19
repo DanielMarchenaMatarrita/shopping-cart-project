@@ -9,11 +9,13 @@
 .item-card__meta { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; }
 .item-card__category { color: #32604a; font-size: 12px; font-weight: 700; }
 .item-card__badge { background: #edf1f0; color: #586662; border-radius: 30px; padding: 4px 8px; font-size: 11px; }
+.item-card__badge--demo { background: #fdf4e3; color: #6b4a12; font-weight: 700; }
 .item-card__title { margin: 0; font-size: 19px; line-height: 1.25; color: #172d25; }
 .item-card__title-link { color: inherit; text-decoration: none; }
 .item-card__title-link:hover { text-decoration: underline; }
 .item-card__subtitle { margin: 0; color: #5d6e65; font-size: 13px; }
 .item-card__price { font-weight: 700; margin: 0; }
+.item-card__price small { color: #64766c; font-weight: 600; font-size: 12px; }
 .item-card__actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: auto; padding-top: 10px; }
 .item-card__details, .item-card__quick-view, .item-card__buy { cursor: pointer; border-radius: 9px; border: 1px solid #27794c; padding: 10px 13px; font: inherit; font-weight: 600; font-size: 13px; }
 .item-card__details { display: inline-flex; align-items: center; justify-content: center; background: white; color: #216a42; text-decoration: none; }
