@@ -2,18 +2,13 @@ import "./ItemCard.css";
 import { Link, useLocation } from "react-router";
 import { categories } from "../data/categories";
 import { isPurchasable } from "../data/catalogSelectors";
-import {
-  getProductEmoji,
-  getProductEmojiLabel,
-} from "../data/productEmojis";
+import ProductMedia from "./ProductMedia";
 import { formatCrc } from "../utils/formatCurrency";
 
 const labels = Object.fromEntries(categories.map(({ id, label }) => [id, label]));
 
 export default function ItemCard({ item, mode = "reference", onViewDetails, onAddToCart }) {
   const forSale = mode === "store" && item.isDemo === true && isPurchasable(item);
-  const imageSrc = item.media?.imageUrl ?? item.image ?? null;
-  const imageAlt = item.media?.alt ?? `Imagen de ${item.name}`;
   const location = useLocation();
   const detailsPath = `/products/${encodeURIComponent(item.id)}`;
   const detailsState = {
@@ -22,23 +17,7 @@ export default function ItemCard({ item, mode = "reference", onViewDetails, onAd
 
   return (
     <article className="item-card">
-      <div className="item-card__media">
-        {imageSrc ? (
-          <img src={imageSrc} alt={imageAlt} loading="lazy" onError={(event) => {
-            event.currentTarget.hidden = true;
-            event.currentTarget.nextElementSibling.hidden = false;
-          }} />
-        ) : null}
-        <div
-          className="item-card__placeholder"
-          hidden={Boolean(imageSrc)}
-          role="img"
-          aria-label={`${getProductEmojiLabel(item)}. Product photography pending verification.`}
-        >
-          <span aria-hidden="true">{getProductEmoji(item)}</span>
-          <small>Photography pending verification</small>
-        </div>
-      </div>
+      <ProductMedia product={item} compact />
       <div className="item-card__body">
         <div className="item-card__meta">
           <span className="item-card__category">{labels[item.categoryId] ?? "Other"}</span>

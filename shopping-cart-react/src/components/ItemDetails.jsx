@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import ProductInformation from "./ProductInformation";
+import ProductMedia from "./ProductMedia";
 
 export default function ItemDetails({ item, onClose }) {
   const dialogRef = useRef(null);
@@ -39,6 +40,7 @@ export default function ItemDetails({ item, onClose }) {
         </button>
       </div>
 
+      <ProductMedia product={item} />
       <ProductInformation item={item} />
     </dialog>
   );

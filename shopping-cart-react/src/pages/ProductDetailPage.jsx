@@ -1,10 +1,7 @@
 import { Link, useLocation, useParams } from "react-router";
 import ProductInformation from "../components/ProductInformation";
 import { getCategoryLabel, isPurchasable } from "../data/catalogSelectors";
-import {
-    getProductEmoji,
-    getProductEmojiLabel,
-} from "../data/productEmojis";
+import ProductMedia from "../components/ProductMedia";
 import { useCart } from "../features/cart/useCart";
 import { useProductDetails } from "../hooks/useProductDetails";
 
@@ -62,13 +59,6 @@ export default function ProductDetailPage() {
             {!loading && !error && product && (
                 <article>
                     <header>
-                        <span
-                            className="product-detail__emoji"
-                            role="img"
-                            aria-label={getProductEmojiLabel(product)}
-                        >
-                            {getProductEmoji(product)}
-                        </span>
                         <p className="eyebrow">
                             {getCategoryLabel(product.categoryId)}
                             {product.isDemo ? " · Demo store" : ""}
@@ -79,6 +69,7 @@ export default function ProductDetailPage() {
                             : {product.id}
                         </p>
                     </header>
+                    <ProductMedia product={product} />
 
                     {canPurchase && (
                         <div className="product-detail__actions">
