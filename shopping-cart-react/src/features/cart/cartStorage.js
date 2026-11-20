@@ -1,4 +1,5 @@
 import { storeCatalog } from "../../data/storeCatalog.js";
+import { getAvailableStock } from "../inventory/inventory.js";
 import {
     createCartLine,
     initialCartState,
@@ -41,6 +42,7 @@ export function hydrateCartPayload(payload, catalog = storeCatalog) {
     }
 
     const quantitiesByProductId = new Map();
+    let adjusted = false;
 
     for (const record of payload.items) {
         if (!isRecord(record)) continue;
@@ -54,25 +56,29 @@ export function hydrateCartPayload(payload, catalog = storeCatalog) {
         // Persisted values must already be numbers. In particular, `"2"` is
         // not accepted as a quantity at this trust boundary.
         if (
-            !Number.isInteger(record.quantity) ||
-            record.quantity < 1 ||
-            record.quantity > MAX_CART_QUANTITY
+            !Number.isSafeInteger(record.quantity) ||
+            record.quantity < 1
         ) {
             continue;
         }
 
-        const quantity = normalizeCartQuantity(record.quantity);
+        if (record.quantity > MAX_CART_QUANTITY) adjusted = true;
+        const quantity = normalizeCartQuantity(Math.min(record.quantity, MAX_CART_QUANTITY));
         if (quantity === null) continue;
 
         const product = findEligibleDemoProduct(record.productId, catalog);
         const line = createCartLine(product, quantity);
         if (!line) continue;
+        const stock = getAvailableStock(line.productId);
+        if (stock === null || stock === 0) {
+            adjusted = true;
+            continue;
+        }
 
         const currentQuantity = quantitiesByProductId.get(line.productId) ?? 0;
-        quantitiesByProductId.set(
-            line.productId,
-            Math.min(currentQuantity + quantity, MAX_CART_QUANTITY)
-        );
+        const nextQuantity = Math.min(currentQuantity + quantity, MAX_CART_QUANTITY, stock);
+        if (nextQuantity < currentQuantity + quantity) adjusted = true;
+        quantitiesByProductId.set(line.productId, nextQuantity);
     }
 
     const items = [];
@@ -87,6 +93,7 @@ export function hydrateCartPayload(payload, catalog = storeCatalog) {
     return {
         state: { items },
         status: "hydrated",
+        adjusted,
     };
 }
 

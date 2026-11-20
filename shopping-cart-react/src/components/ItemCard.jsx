@@ -3,12 +3,15 @@ import { Link, useLocation } from "react-router";
 import { categories } from "../data/categories";
 import { isPurchasable } from "../data/catalogSelectors";
 import ProductMedia from "./ProductMedia";
+import DemoStock from "./DemoStock";
+import { useDemoStock } from "../features/inventory/useDemoStock";
 import { formatCrc } from "../utils/formatCurrency";
 
 const labels = Object.fromEntries(categories.map(({ id, label }) => [id, label]));
 
 export default function ItemCard({ item, mode = "reference", onViewDetails, onAddToCart }) {
   const forSale = mode === "store" && item.isDemo === true && isPurchasable(item);
+  const { canAdd } = useDemoStock(item.id);
   const location = useLocation();
   const detailsPath = `/products/${encodeURIComponent(item.id)}`;
   const detailsState = {
@@ -40,6 +43,7 @@ export default function ItemCard({ item, mode = "reference", onViewDetails, onAd
             {formatCrc(item.price)} <small>fictional price</small>
           </p>
         )}
+        {forSale && <DemoStock productId={item.id} />}
         <div className="item-card__actions">
           <Link
             className="item-card__details"
@@ -60,7 +64,7 @@ export default function ItemCard({ item, mode = "reference", onViewDetails, onAd
             </button>
           )}
           {forSale && typeof onAddToCart === "function" && (
-            <button type="button" className="item-card__buy" onClick={() => onAddToCart(item)}>Add to cart</button>
+            <button type="button" className="item-card__buy" disabled={!canAdd} onClick={() => onAddToCart(item)}>Add to cart</button>
           )}
         </div>
       </div>

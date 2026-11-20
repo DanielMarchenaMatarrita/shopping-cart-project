@@ -2,6 +2,8 @@ import { Link, useLocation, useParams } from "react-router";
 import ProductInformation from "../components/ProductInformation";
 import { getCategoryLabel, isPurchasable } from "../data/catalogSelectors";
 import ProductMedia from "../components/ProductMedia";
+import DemoStock from "../components/DemoStock";
+import { useDemoStock } from "../features/inventory/useDemoStock";
 import { useCart } from "../features/cart/useCart";
 import { useProductDetails } from "../hooks/useProductDetails";
 
@@ -19,6 +21,7 @@ export default function ProductDetailPage() {
     const { id } = useParams();
     const location = useLocation();
     const { product, loading, error } = useProductDetails(id);
+    const { canAdd } = useDemoStock(id);
     const { addItem } = useCart();
     const backTo = resolveBackTo(location);
     const canPurchase = product
@@ -70,12 +73,14 @@ export default function ProductDetailPage() {
                         </p>
                     </header>
                     <ProductMedia product={product} />
+                    {canPurchase && <DemoStock productId={product.id} />}
 
                     {canPurchase && (
                         <div className="product-detail__actions">
                             <button
                                 type="button"
                                 className="product-detail__add"
+                                disabled={!canAdd}
                                 onClick={() => addItem(product)}
                                 aria-label={`Add ${product.name} to cart`}
                             >

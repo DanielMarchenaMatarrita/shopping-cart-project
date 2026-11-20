@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import ProductInformation from "./ProductInformation";
 import ProductMedia from "./ProductMedia";
+import DemoStock from "./DemoStock";
 
 export default function ItemDetails({ item, onClose }) {
   const dialogRef = useRef(null);
@@ -41,6 +42,7 @@ export default function ItemDetails({ item, onClose }) {
       </div>
 
       <ProductMedia product={item} />
+      {item.isDemo && <DemoStock productId={item.id} />}
       <ProductInformation item={item} />
     </dialog>
   );

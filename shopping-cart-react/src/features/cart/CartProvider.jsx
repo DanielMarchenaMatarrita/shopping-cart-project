@@ -16,7 +16,8 @@ import {
 } from "./cartStorage";
 
 function initializeCart() {
-    return loadCartFromStorage().state;
+    const result = loadCartFromStorage();
+    return { ...result.state, hydrationAdjusted: result.adjusted === true };
 }
 
 export default function CartProvider({ children }) {
@@ -89,6 +90,7 @@ export default function CartProvider({ children }) {
             itemCount: getCartItemCount(items),
             subtotal: getCartSubtotal(items),
             total: getCartTotal(items),
+            hydrationAdjusted: state.hydrationAdjusted,
             addItem,
             incrementQuantity,
             decrementQuantity,
@@ -98,6 +100,7 @@ export default function CartProvider({ children }) {
         };
     }, [
         state.items,
+        state.hydrationAdjusted,
         addItem,
         incrementQuantity,
         decrementQuantity,

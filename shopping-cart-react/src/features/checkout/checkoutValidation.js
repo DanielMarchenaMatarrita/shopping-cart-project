@@ -1,4 +1,5 @@
 import { storeCatalog } from "../../data/storeCatalog.js";
+import { validateCartAgainstInventory } from "../inventory/inventory.js";
 import {
     createCartLine,
     MAX_CART_QUANTITY,
@@ -66,6 +67,9 @@ export function validateCartForCheckout(cartItems, catalog = storeCatalog) {
             items: [],
         };
     }
+
+    const inventory = validateCartAgainstInventory(cartItems);
+    if (!inventory.isValid) return { ...inventory, items: [] };
 
     const seenProductIds = new Set();
     const items = [];

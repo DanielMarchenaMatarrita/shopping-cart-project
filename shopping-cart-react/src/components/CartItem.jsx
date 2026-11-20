@@ -2,7 +2,7 @@ import { formatCrc } from "../utils/formatCurrency";
 import {
     getCartLineSubtotal,
 } from "../features/cart/cartSelectors";
-import { MAX_CART_QUANTITY } from "../features/cart/cartReducer";
+import { canAddToCart } from "../features/inventory/inventory";
 
 export default function CartItem({
     item,
@@ -11,6 +11,7 @@ export default function CartItem({
     onRemove,
 }) {
     const lineSubtotal = getCartLineSubtotal(item);
+    const canIncrement = canAddToCart(item.productId, item.quantity, 1);
 
     return (
         <li className="cart-item">
@@ -22,6 +23,7 @@ export default function CartItem({
                         <span className="cart-item__demo">Demo item</span>
                     )}
                 </p>
+                {!canIncrement && <p>Fictional demo stock or cart quantity limit reached.</p>}
             </div>
 
             <div
@@ -43,7 +45,7 @@ export default function CartItem({
                 <button
                     type="button"
                     onClick={() => onIncrement(item.productId)}
-                    disabled={item.quantity >= MAX_CART_QUANTITY}
+                    disabled={!canIncrement}
                     aria-label={`Increase quantity of ${item.name}`}
                 >
                     +

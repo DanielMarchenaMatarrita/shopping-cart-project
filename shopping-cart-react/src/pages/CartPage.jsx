@@ -13,6 +13,7 @@ export default function CartPage() {
         decrementQuantity,
         removeItem,
         clearCart,
+        hydrationAdjusted,
     } = useCart();
 
     const isEmpty = items.length === 0;
@@ -28,6 +29,7 @@ export default function CartPage() {
                     reservation.
                 </p>
             </header>
+            {hydrationAdjusted && <p role="status">Your saved cart was adjusted to current fictional demo stock; unavailable items were removed.</p>}
 
             {isEmpty ? (
                 <section className="cart-empty" aria-labelledby="empty-cart-title">

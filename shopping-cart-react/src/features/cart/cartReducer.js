@@ -1,4 +1,7 @@
-export const MAX_CART_QUANTITY = 99;
+import { canAddToCart, MAX_CART_QUANTITY } from "../inventory/inventory.js";
+import { storeCatalog } from "../../data/storeCatalog.js";
+
+export { MAX_CART_QUANTITY };
 
 export const initialCartState = {
     items: [],
@@ -9,9 +12,8 @@ export function normalizeCartQuantity(value) {
 
     // Whole-number quantities only; reject decimals rather than truncating
     // them silently.
-    if (!Number.isInteger(quantity) || quantity < 1) return null;
-
-    return Math.min(quantity, MAX_CART_QUANTITY);
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_CART_QUANTITY) return null;
+    return quantity;
 }
 
 export function createCartLine(product, quantity) {
@@ -64,9 +66,12 @@ export function cartReducer(state, action) {
             const quantity = normalizeCartQuantity(
                 action.payload?.quantity ?? 1
             );
-            const line = createCartLine(action.payload?.product, quantity);
+            const product = storeCatalog.find((entry) => entry.id === action.payload?.product?.id);
+            const line = createCartLine(product, quantity);
 
             if (!line || quantity === null) return state;
+            const existing = state.items.find((item) => matchesProduct(item, line.productId));
+            if (!canAddToCart(line.productId, existing?.quantity ?? 0, quantity)) return state;
 
             const alreadyInCart = state.items.some((item) =>
                 matchesProduct(item, line.productId)
@@ -105,7 +110,7 @@ export function cartReducer(state, action) {
                 matchesProduct(entry, productId)
             );
 
-            if (!item || item.quantity >= MAX_CART_QUANTITY) return state;
+            if (!item || !canAddToCart(productId, item.quantity, 1)) return state;
 
             return {
                 ...state,
@@ -145,6 +150,7 @@ export function cartReducer(state, action) {
 
             if (!item || quantity === null) return state;
             if (quantity === item.quantity) return state;
+            if (quantity > item.quantity && !canAddToCart(productId, item.quantity, quantity - item.quantity)) return state;
 
             return {
                 ...state,
@@ -176,7 +182,7 @@ export function cartReducer(state, action) {
         }
 
         case "CLEAR_CART":
-            return state.items.length === 0 ? state : initialCartState;
+            return state.items.length === 0 ? state : { ...state, items: [] };
 
         default:
             return state;
