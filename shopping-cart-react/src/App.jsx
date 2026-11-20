@@ -11,6 +11,7 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import ProductsPage from "./pages/ProductsPage";
 import OrdersPage from "./pages/OrdersPage";
 import OrderDetailPage from "./pages/OrderDetailPage";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
 import "./App.css";
 
 export default function App() {
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="/cart" element={<CartPage />} />
           <Route path="/orders" element={<OrdersPage />} />
           <Route path="/orders/:id" element={<OrderDetailPage />} />
+          <Route path="/admin" element={<AdminDashboardPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route
             path="/checkout/confirmation"
