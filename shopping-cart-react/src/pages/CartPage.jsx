@@ -78,6 +78,9 @@ export default function CartPage() {
                     </div>
 
                     <p className="cart-page__actions">
+                        <Link className="cart-page__checkout" to="/checkout">
+                            Proceed to demo checkout
+                        </Link>
                         <Link to="/products">← Continue shopping</Link>
                     </p>
                 </>
