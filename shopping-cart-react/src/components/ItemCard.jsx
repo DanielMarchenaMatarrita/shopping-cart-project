@@ -2,16 +2,13 @@ import "./ItemCard.css";
 import { Link, useLocation } from "react-router";
 import { categories } from "../data/categories";
 import { isPurchasable } from "../data/catalogSelectors";
+import {
+  getProductEmoji,
+  getProductEmojiLabel,
+} from "../data/productEmojis";
 import { formatCrc } from "../utils/formatCurrency";
 
 const labels = Object.fromEntries(categories.map(({ id, label }) => [id, label]));
-const categoryIcons = {
-  "frutas-tropicales": "🥭", citricos: "🍋", "frutas-berries": "🍓",
-  "frutas-importadas": "🍎", "bananos-platanos": "🍌",
-  "hortalizas-fruto": "🍅", "hojas-hierbas": "🥬",
-  "raices-tuberculos": "🥕", "bulbos-condimentos": "🧄",
-  cruciferas: "🥦", "granos-leguminosas": "🌽",
-};
 
 export default function ItemCard({ item, mode = "reference", onViewDetails, onAddToCart }) {
   const forSale = mode === "store" && item.isDemo === true && isPurchasable(item);
@@ -32,9 +29,14 @@ export default function ItemCard({ item, mode = "reference", onViewDetails, onAd
             event.currentTarget.nextElementSibling.hidden = false;
           }} />
         ) : null}
-        <div className="item-card__placeholder" hidden={Boolean(imageSrc)} aria-hidden="true">
-          <span>{categoryIcons[item.categoryId] ?? "🌱"}</span>
-          <small>Image pending verification</small>
+        <div
+          className="item-card__placeholder"
+          hidden={Boolean(imageSrc)}
+          role="img"
+          aria-label={`${getProductEmojiLabel(item)}. Product photography pending verification.`}
+        >
+          <span aria-hidden="true">{getProductEmoji(item)}</span>
+          <small>Photography pending verification</small>
         </div>
       </div>
       <div className="item-card__body">
