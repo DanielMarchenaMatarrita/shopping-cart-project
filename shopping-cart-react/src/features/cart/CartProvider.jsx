@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useReducer } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import { CartContext } from "./cartContext";
 import {
     cartReducer,
@@ -9,9 +9,38 @@ import {
     getCartSubtotal,
     getCartTotal,
 } from "./cartSelectors";
+import {
+    loadCartFromStorage,
+    saveCartToStorage,
+    serializeCartItems,
+} from "./cartStorage";
+
+function initializeCart() {
+    return loadCartFromStorage().state;
+}
 
 export default function CartProvider({ children }) {
-    const [state, dispatch] = useReducer(cartReducer, initialCartState);
+    const [state, dispatch] = useReducer(
+        cartReducer,
+        initialCartState,
+        initializeCart
+    );
+    const lastSerializedItems = useRef(serializeCartItems(state.items));
+
+    useEffect(() => {
+        const serializedItems = serializeCartItems(state.items);
+
+        // Lazy hydration already supplied this state. Skipping an identical
+        // initial write prevents corrupt or future-version data from being
+        // overwritten before the user changes their cart.
+        if (serializedItems === lastSerializedItems.current) return;
+
+        const result = saveCartToStorage(state.items);
+
+        if (result.ok) {
+            lastSerializedItems.current = serializedItems;
+        }
+    }, [state.items]);
 
     const addItem = useCallback((product, quantity = 1) => {
         dispatch({

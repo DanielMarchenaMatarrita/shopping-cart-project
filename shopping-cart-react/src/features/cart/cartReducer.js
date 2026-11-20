@@ -4,7 +4,7 @@ export const initialCartState = {
     items: [],
 };
 
-function normalizeQuantity(value) {
+export function normalizeCartQuantity(value) {
     const quantity = Number(value);
 
     // Whole-number quantities only; reject decimals rather than truncating
@@ -14,8 +14,15 @@ function normalizeQuantity(value) {
     return Math.min(quantity, MAX_CART_QUANTITY);
 }
 
-function createCartLine(product, quantity) {
+export function createCartLine(product, quantity) {
     if (!product || typeof product !== "object") return null;
+    if (
+        !Number.isInteger(quantity) ||
+        quantity < 1 ||
+        quantity > MAX_CART_QUANTITY
+    ) {
+        return null;
+    }
 
     const hasValidIdentity =
         typeof product.id === "string" && product.id.trim() !== "";
@@ -54,7 +61,9 @@ function matchesProduct(item, productId) {
 export function cartReducer(state, action) {
     switch (action?.type) {
         case "ADD_ITEM": {
-            const quantity = normalizeQuantity(action.payload?.quantity ?? 1);
+            const quantity = normalizeCartQuantity(
+                action.payload?.quantity ?? 1
+            );
             const line = createCartLine(action.payload?.product, quantity);
 
             if (!line || quantity === null) return state;
@@ -129,7 +138,7 @@ export function cartReducer(state, action) {
 
         case "UPDATE_QUANTITY": {
             const productId = action.payload?.productId;
-            const quantity = normalizeQuantity(action.payload?.quantity);
+            const quantity = normalizeCartQuantity(action.payload?.quantity);
             const item = state.items.find((entry) =>
                 matchesProduct(entry, productId)
             );
