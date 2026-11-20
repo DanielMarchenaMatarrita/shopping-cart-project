@@ -19,6 +19,7 @@ export default function SiteHeader() {
                 <NavLink className={navLinkClass} to="/cart">
                     Cart <CartBadge />
                 </NavLink>
+                <NavLink className={navLinkClass} to="/orders">Demo orders</NavLink>
             </nav>
         </header>
     );

@@ -1,13 +1,14 @@
 import { Link, useLocation } from "react-router";
 import OrderSummary from "../components/OrderSummary";
 import { DELIVERY_METHODS } from "../features/checkout/checkoutValidation";
-import { isDemoOrderSnapshot } from "../features/checkout/orderFactory";
+import { useOrders } from "../features/orders/useOrders";
 
 export default function OrderConfirmationPage() {
     const location = useLocation();
-    const order = location.state?.order;
+    const { orders } = useOrders();
+    const order = orders.find((entry) => entry.id === location.state?.orderId);
 
-    if (!isDemoOrderSnapshot(order)) {
+    if (!order) {
         return (
             <main className="catalog-page confirmation-page">
                 <p className="eyebrow">Demo checkout</p>
@@ -35,28 +36,19 @@ export default function OrderConfirmationPage() {
                 <dl>
                     <div>
                         <dt>Local demo reference</dt>
-                        <dd>{order.demoReference}</dd>
-                    </div>
-                    <div>
-                        <dt>Display name</dt>
-                        <dd>{order.customerName}</dd>
+                        <dd>{order.id}</dd>
                     </div>
                     <div>
                         <dt>Fulfillment</dt>
                         <dd>{DELIVERY_METHODS[order.deliveryMethod]}</dd>
                     </div>
-                    {order.notes && (
-                        <div>
-                            <dt>Demo notes</dt>
-                            <dd>{order.notes}</dd>
-                        </div>
-                    )}
                 </dl>
             </section>
 
             <OrderSummary order={order} />
             <p className="confirmation-page__actions">
                 <Link to="/products">Return to catalog</Link>
+                {" · "}<Link to={`/orders/${encodeURIComponent(order.id)}`}>View saved demo order</Link>
             </p>
         </main>
     );

@@ -7,6 +7,7 @@ import {
 } from "../features/checkout/checkoutValidation";
 import { createDemoOrder } from "../features/checkout/orderFactory";
 import { useCart } from "../features/cart/useCart";
+import { useOrders } from "../features/orders/useOrders";
 
 const initialFormValues = {
     customerName: "",
@@ -16,6 +17,7 @@ const initialFormValues = {
 
 export default function CheckoutPage() {
     const { items, clearCart } = useCart();
+    const { recordOrder } = useOrders();
     const navigate = useNavigate();
     const [formValues, setFormValues] = useState(initialFormValues);
     const [errors, setErrors] = useState({});
@@ -23,6 +25,7 @@ export default function CheckoutPage() {
     const [reviewOrder, setReviewOrder] = useState(null);
     const [isConfirming, setIsConfirming] = useState(false);
     const confirmingRef = useRef(false);
+    const identityRef = useRef(null);
 
     const isEmpty = items.length === 0;
 
@@ -64,6 +67,7 @@ export default function CheckoutPage() {
         }
 
         setFormValues(form.value);
+        identityRef.current = null;
         setCheckoutError("");
         setReviewOrder(result.order);
     }
@@ -90,10 +94,27 @@ export default function CheckoutPage() {
             return;
         }
 
+        if (!identityRef.current) {
+            if (!globalThis.crypto?.randomUUID) {
+                confirmingRef.current = false;
+                setIsConfirming(false);
+                setCheckoutError("A secure local demo ID is unavailable. Your cart was not cleared.");
+                return;
+            }
+            identityRef.current = { id: `local-demo-${globalThis.crypto.randomUUID()}`, createdAt: new Date().toISOString() };
+        }
+        const recorded = recordOrder(result.order, identityRef.current.id, identityRef.current.createdAt);
+        if (!recorded.ok) {
+            confirmingRef.current = false;
+            setIsConfirming(false);
+            setCheckoutError("Could not save the simulated order in browser storage. Your cart was not cleared; check browser storage or incompatible history.");
+            return;
+        }
+
         clearCart();
         navigate("/checkout/confirmation", {
             replace: true,
-            state: { order: result.order },
+            state: { orderId: recorded.order.id },
         });
     }
 

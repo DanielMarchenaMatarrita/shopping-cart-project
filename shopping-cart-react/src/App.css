@@ -1,5 +1,12 @@
 #root { width: 100%; max-width: 1420px; margin: 0 auto; padding: 28px 24px 64px; }
 .catalog-page { color: #183027; }
+.orders-page { max-width: 820px; }
+.orders-list { display: grid; gap: 12px; padding: 0; list-style: none; }
+.orders-list__item { padding: 16px; border: 1px solid #dde5e2; border-radius: 14px; background: #fff; overflow-wrap: anywhere; }
+.orders-list__item h2 { font-size: 1rem; margin: 0; }
+.order-details { display: grid; grid-template-columns: minmax(90px, 1fr) minmax(0, 2fr); gap: 10px; }
+.order-details dt { font-weight: 700; }
+.order-details dd { margin: 0; overflow-wrap: anywhere; }
 .catalog-intro { margin: 0 0 28px; }
 .eyebrow { color: #267548; text-transform: uppercase; font-size: 12px; font-weight: 800; letter-spacing: .09em; }
 .catalog-intro h1 { font-size: clamp(30px, 4vw, 48px); line-height: 1.15; margin: 8px 0 14px; }
